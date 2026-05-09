@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { useLocation } from "@/context/LocationContext";
 
 const LINKS = [
   { href: "/prayer-reader", label: "Prayer Reader" },
@@ -15,6 +16,7 @@ const LINKS = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const { info } = useLocation();
 
   return (
     <nav className="sticky top-0 z-40 border-b border-parchment-400 bg-parchment-50">
@@ -45,13 +47,11 @@ export function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          <span className="hidden lg:block font-ui text-sm text-navy-700">
-            Shabbat begins Fri 7:42pm
-          </span>
-          <span className="hidden lg:block w-px h-4 bg-parchment-400" />
-          <span className="hidden sm:grid w-7 h-7 rounded-full bg-parchment-200 place-items-center font-ui text-xs font-semibold text-navy-800 shrink-0">
-            SK
-          </span>
+          {info?.shabbatText && (
+            <span className="hidden lg:block font-ui text-sm text-navy-700">
+              {info.shabbatText}
+            </span>
+          )}
           <button
             onClick={() => setOpen((o) => !o)}
             className="md:hidden p-2 rounded-lg text-navy-800 hover:bg-parchment-200 transition-colors focus:outline-none"

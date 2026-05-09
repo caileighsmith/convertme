@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { useLocation } from "@/context/LocationContext";
 
 type IconName = "sun" | "horizon" | "moon";
 
@@ -39,6 +40,7 @@ const FEATURES: Feature[] = [
 
 export default function HomePage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const { info: locationInfo } = useLocation();
 
   useEffect(() => { setCurrentId(getCurrentServiceId()); }, []);
 
@@ -86,7 +88,9 @@ export default function HomePage() {
             <p className="font-ui text-[11px] uppercase tracking-[0.14em] text-navy-700">
               Today · {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
-            <p className="font-ui text-xs text-navy-700">Brooklyn, NY</p>
+            {locationInfo?.cityName && (
+              <p className="font-ui text-xs text-navy-700">{locationInfo.cityName}</p>
+            )}
           </div>
           <div className="flex flex-col gap-0">
             {DAILY_SERVICES.map((s) => {
