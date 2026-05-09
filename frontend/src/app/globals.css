@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f5f1e7;
+  color: #1a1612;
+  font-family: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.005em;
+}
+
+[lang="he"], .font-hebrew {
+  font-family: 'Frank Ruhl Libre', serif;
+  line-height: 1.8;
+  direction: rtl;
+  font-feature-settings: normal;
+  letter-spacing: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cfc6ad; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b3aa97; }

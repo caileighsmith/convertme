@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+backend/.venv/
+venv/
+env/
+*.egg-info/
+dist/
+*.egg
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+*.pid
+
+# TypeScript
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
