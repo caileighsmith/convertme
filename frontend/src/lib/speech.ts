@@ -1,7 +1,7 @@
 // Matches the Tetragrammaton and its common pointed/abbreviated forms
 const DIVINE_NAME_RE = /יְהֹוָה|יְהוָה|יהוה|יְיָ|יי/g;
 
-function sanitizeForSpeech(text: string): string {
+export function sanitizeForSpeech(text: string): string {
   return text.replace(DIVINE_NAME_RE, "אֲדֹנָי");
 }
 

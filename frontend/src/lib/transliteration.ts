@@ -40,6 +40,9 @@ const isConsonant = (cp: number) => cp >= 0x05D0 && cp <= 0x05EA;
 const isDiacritic = (cp: number) => cp >= 0x0591 && cp <= 0x05C7;
 
 export function transliterateAshkenazi(word: string): string {
+  const stripped = word.replace(/[֑-ׇ]/g, '');
+  if (stripped === 'יהוה' || stripped === 'יי') return 'Adonai';
+
   const chars = Array.from(word);
   const n = chars.length;
   const out: string[] = [];

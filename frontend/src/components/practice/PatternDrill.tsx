@@ -4,12 +4,13 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { PATTERNS, PATTERN_CATEGORIES, LEVEL_LABELS } from "@/data/patterns";
 import type { Pattern } from "@/data/patterns";
 import { Icon } from "@/components/ui/Icon";
+import { sanitizeForSpeech } from "@/lib/speech";
 
 function useSpeech() {
   const speak = useCallback((text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(sanitizeForSpeech(text));
     utt.lang = "he-IL";
     utt.rate = 0.7;
     window.speechSynthesis.speak(utt);

@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { LETTERS, VOWELS } from "@/data/alephbet";
 import { Icon } from "@/components/ui/Icon";
+import { sanitizeForSpeech } from "@/lib/speech";
 
 type Tab = "letters" | "vowels";
 
@@ -10,7 +11,7 @@ function useSpeech() {
   const speak = useCallback((text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(sanitizeForSpeech(text));
     utt.lang = "he-IL";
     utt.rate = 0.75;
     window.speechSynthesis.speak(utt);

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import type { HebrewWord, WordDefinition } from "@/types/prayer";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Icon } from "@/components/ui/Icon";
+import { sanitizeForSpeech } from "@/lib/speech";
 
 interface Props {
   word: HebrewWord;
@@ -19,7 +20,7 @@ function useSpeech() {
   const speak = useCallback((text: string) => {
     if (!supported) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(sanitizeForSpeech(text));
     utt.lang = "he-IL"; utt.rate = 0.85;
     utt.onstart = () => setSpeaking(true);
     utt.onend = () => setSpeaking(false);
