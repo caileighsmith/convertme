@@ -1,5 +1,5 @@
 import { AuthGuard } from "@/components/layout/AuthGuard";
 
-export default function PrayerReaderLayout({ children }: { children: React.ReactNode }) {
+export default function PracticeLayout({ children }: { children: React.ReactNode }) {
   return <AuthGuard>{children}</AuthGuard>;
 }

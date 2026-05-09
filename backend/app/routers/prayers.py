@@ -1,10 +1,11 @@
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.prayer import ServiceInfo
 from app.services.sefaria import fetch_prayer_section, fetch_service_sections, fetch_word_definition
+from app.services.auth import get_current_user
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # Maps service IDs to (Sefaria day category, Sefaria service name)
 SEFARIA_SERVICE_INFO: dict[str, tuple[str, str]] = {

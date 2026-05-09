@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { useLocation } from "@/context/LocationContext";
+import { useAuth } from "@/context/AuthContext";
 
 const LINKS = [
   { href: "/prayer-reader", label: "Prayer Reader" },
@@ -16,7 +17,15 @@ const LINKS = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const router = useRouter();
   const { info } = useLocation();
+  const { user, logout } = useAuth();
+
+  function handleLogout() {
+    logout();
+    router.push("/");
+    setOpen(false);
+  }
 
   return (
     <nav className="sticky top-0 z-40 border-b border-parchment-400 bg-parchment-50">
@@ -52,6 +61,30 @@ export function Navbar() {
               {info.shabbatText}
             </span>
           )}
+
+          {/* Auth — desktop */}
+          {user ? (
+            <div className="hidden md:flex items-center gap-3">
+              <span className="font-ui text-xs text-navy-700">{user.email}</span>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 rounded-lg border border-parchment-500 font-ui text-sm text-navy-900 hover:bg-parchment-200 transition-colors focus:outline-none"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <Link href="/login" className="px-3 py-1.5 rounded-lg font-ui text-sm text-navy-800 hover:text-navy-900 transition-colors">
+                Sign in
+              </Link>
+              <Link href="/register" className="px-3 py-1.5 rounded-lg bg-navy-900 text-parchment-50 font-ui text-sm font-medium hover:bg-navy-900/90 transition-colors">
+                Get started
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile hamburger */}
           <button
             onClick={() => setOpen((o) => !o)}
             className="md:hidden p-2 rounded-lg text-navy-800 hover:bg-parchment-200 transition-colors focus:outline-none"
@@ -77,6 +110,28 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          <div className="border-t border-parchment-400 mt-2 pt-2">
+            {user ? (
+              <>
+                <p className="px-3 py-1 font-ui text-xs text-navy-700">{user.email}</p>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors">
+                  Sign in
+                </Link>
+                <Link href="/register" onClick={() => setOpen(false)} className="block px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors">
+                  Create account
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       )}
     </nav>
