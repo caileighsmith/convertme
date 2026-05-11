@@ -4,7 +4,10 @@ from sqlalchemy import select
 
 from app.db import get_db
 from app.models.user import User
-from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse
+from app.schemas.auth import (
+    RegisterRequest, LoginRequest, TokenResponse,
+    UserResponse, OnboardingRequest,
+)
 from app.services.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
@@ -34,4 +37,18 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/onboarding", response_model=UserResponse)
+async def save_onboarding(
+    body: OnboardingRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    current_user.journey_stage = body.journey_stage
+    current_user.tradition = body.tradition
+    current_user.hebrew_level = body.hebrew_level
+    await db.commit()
+    await db.refresh(current_user)
     return current_user

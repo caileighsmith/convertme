@@ -5,16 +5,21 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, onboardingComplete } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+    if (!user) {
       router.push(`/login?from=${encodeURIComponent(pathname)}`);
+      return;
     }
-  }, [user, loading, router, pathname]);
+    if (!onboardingComplete) {
+      router.push("/onboarding");
+    }
+  }, [user, loading, onboardingComplete, router, pathname]);
 
-  if (loading || !user) return null;
+  if (loading || !user || !onboardingComplete) return null;
   return <>{children}</>;
 }

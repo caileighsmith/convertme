@@ -16,8 +16,17 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class OnboardingRequest(BaseModel):
+    journey_stage: str
+    tradition: str
+    hebrew_level: int
+
+
 class UserResponse(BaseModel):
     id: int
     email: str
+    journey_stage: str | None = None
+    tradition: str | None = None
+    hebrew_level: int | None = None
 
     model_config = {"from_attributes": True}

@@ -64,14 +64,14 @@ export function Navbar() {
 
           {/* Auth — desktop */}
           {user ? (
-            <div className="hidden md:flex items-center gap-3">
-              <span className="font-ui text-xs text-navy-700">{user.email}</span>
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 rounded-lg border border-parchment-500 font-ui text-sm text-navy-900 hover:bg-parchment-200 transition-colors focus:outline-none"
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/profile"
+                className="w-8 h-8 rounded-full bg-navy-900 text-parchment-50 grid place-items-center font-ui text-xs font-semibold hover:bg-navy-900/80 transition-colors"
+                title={user.email}
               >
-                Sign out
-              </button>
+                {user.email.slice(0, 2).toUpperCase()}
+              </Link>
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-2">
@@ -114,12 +114,13 @@ export function Navbar() {
             {user ? (
               <>
                 <p className="px-3 py-1 font-ui text-xs text-navy-700">{user.email}</p>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors"
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  className="block px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors"
                 >
-                  Sign out
-                </button>
+                  Profile
+                </Link>
               </>
             ) : (
               <>
