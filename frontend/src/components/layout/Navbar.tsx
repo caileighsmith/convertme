@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 const LINKS = [
   { href: "/prayer-reader", label: "Prayer Reader" },
   { href: "/practice",      label: "Hebrew Practice" },
+  { href: "/community",     label: "Community" },
   { href: "#",              label: "Find a Rabbi", disabled: true },
   { href: "#",              label: "Halacha",      disabled: true },
 ];
