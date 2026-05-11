@@ -63,7 +63,7 @@ function Avatar({ initials, size = 36 }: { initials: string; size?: number }) {
 
 function PostCard({ post, isOp = false }: { post: PostResponse; isOp?: boolean }) {
   return (
-    <div className={`flex gap-4 p-5 ${isOp ? "bg-parchment-100 border-b border-parchment-400" : "border-b border-parchment-400 last:border-0"}`}>
+    <div className={`flex gap-3 sm:gap-4 p-4 sm:p-5 ${isOp ? "bg-parchment-100 border-b border-parchment-400" : "border-b border-parchment-400 last:border-0"}`}>
       <Avatar initials={post.author_initials} size={36} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-2">
@@ -158,7 +158,7 @@ export default function ThreadPage() {
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-parchment-50">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Back */}
         <Link
           href="/community"
@@ -179,7 +179,7 @@ export default function ThreadPage() {
               {TOPIC_LABELS[thread.topic] ?? thread.topic}
             </span>
           </div>
-          <h1 className="font-ui text-2xl font-semibold tracking-tight text-navy-900 leading-snug mb-2">
+          <h1 className="font-ui text-xl sm:text-2xl font-semibold tracking-tight text-navy-900 leading-snug mb-2">
             {thread.title}
           </h1>
           <div className="flex items-center gap-3 font-ui text-xs text-navy-700">
