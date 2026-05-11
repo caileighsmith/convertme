@@ -3,8 +3,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import prayers
 from app.routers import auth
+from app.routers import community
 from app.config import settings
 from app.db import create_tables
+
+# Import models so SQLAlchemy registers them before create_all
+import app.models.thread  # noqa: F401
+import app.models.post    # noqa: F401
 
 
 @asynccontextmanager
@@ -23,8 +28,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(prayers.router, prefix="/api/prayers", tags=["prayers"])
+app.include_router(auth.router,      prefix="/api/auth",      tags=["auth"])
+app.include_router(prayers.router,   prefix="/api/prayers",   tags=["prayers"])
+app.include_router(community.router, prefix="/api/community", tags=["community"])
 
 
 @app.get("/health")
