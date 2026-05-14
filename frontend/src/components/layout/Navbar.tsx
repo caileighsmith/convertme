@@ -8,11 +8,12 @@ import { useLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 
 const LINKS = [
-  { href: "/prayer-reader", label: "Prayer Reader" },
-  { href: "/practice",      label: "Hebrew Practice" },
-  { href: "/community",     label: "Community" },
-  { href: "#",              label: "Find a Rabbi", disabled: true },
-  { href: "#",              label: "Halacha",      disabled: true },
+  { href: "/prayer-reader",   label: "Prayer Reader" },
+  { href: "/practice",        label: "Hebrew Practice" },
+  { href: "/practice/fluency", label: "Fluency Trainer" },
+  { href: "/community",       label: "Community" },
+  { href: "#",                label: "Find a Rabbi", disabled: true },
+  { href: "#",                label: "Halacha",      disabled: true },
 ];
 
 export function Navbar() {

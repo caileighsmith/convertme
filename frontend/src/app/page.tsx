@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { useLocation } from "@/context/LocationContext";
+import { getFluencyProgress } from "@/lib/api";
+import type { ProgressSummary } from "@/types/fluency";
 
 type IconName = "sun" | "horizon" | "moon";
 
@@ -38,11 +40,30 @@ const FEATURES: Feature[] = [
   { title: "Community",          desc: "Questions, stories, and support from others on the same path.",         icon: "compass",    soon: true },
 ];
 
+// Curriculum metadata for display on home page
+const CURRICULUM_META: { id: string; en: string; he: string }[] = [
+  { id: "modeh_ani",  en: "Modeh Ani",          he: "מוֹדֶה אֲנִי" },
+  { id: "barchu",     en: "Barchu",             he: "בָּרְכוּ" },
+  { id: "shema_v1",   en: "Shema · first line", he: "שְׁמַע יִשְׂרָאֵל" },
+  { id: "veahavta",   en: "Shema · Ve'ahavta",  he: "וְאָהַבְתָּ" },
+  { id: "baruch",     en: "Baruch She'amar",    he: "בָּרוּךְ שֶׁאָמַר" },
+  { id: "ashrei",     en: "Ashrei",             he: "אַשְׁרֵי" },
+  { id: "avot",       en: "Amidah · Avot",      he: "אָבוֹת" },
+  { id: "amidah",     en: "Amidah · weekday",   he: "תְּפִלָּה" },
+];
+
 export default function HomePage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const { info: locationInfo } = useLocation();
+  const [fluencyProgress, setFluencyProgress] = useState<ProgressSummary | null>(null);
 
   useEffect(() => { setCurrentId(getCurrentServiceId()); }, []);
+
+  useEffect(() => {
+    getFluencyProgress()
+      .then(setFluencyProgress)
+      .catch(() => { /* not logged in or no progress yet */ });
+  }, []);
 
   const doneIds = currentId === "mincha"
     ? ["shacharit"]
@@ -176,6 +197,51 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Daily Fluency Practice card ── */}
+      {fluencyProgress && (() => {
+        const currentPrayerMeta = fluencyProgress.current_prayer_id
+          ? CURRICULUM_META.find((m) => m.id === fluencyProgress.current_prayer_id)
+          : CURRICULUM_META[0];
+        if (!currentPrayerMeta) return null;
+        return (
+          <section className="pt-6 pb-6">
+            <div className="bg-parchment-100 border border-parchment-400 rounded-2xl p-7 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center">
+              <div>
+                <p className="font-ui text-[11px] uppercase tracking-[0.14em] text-navy-700 mb-2">
+                  Daily Fluency Practice
+                </p>
+                <div className="flex items-baseline gap-3 flex-wrap mb-1">
+                  <span className="font-heading text-[22px] font-normal text-navy-900">
+                    {currentPrayerMeta.en}
+                  </span>
+                  <span
+                    className="font-hebrew text-[20px] text-navy-700"
+                    lang="he"
+                    dir="rtl"
+                  >
+                    {currentPrayerMeta.he}
+                  </span>
+                </div>
+                <p className="font-ui text-sm text-navy-700">
+                  {fluencyProgress.day_streak > 0
+                    ? `${fluencyProgress.day_streak} day streak · `
+                    : ""}
+                  {fluencyProgress.avg_accuracy > 0
+                    ? `avg accuracy ${Math.round(fluencyProgress.avg_accuracy * 100)}%`
+                    : "Start your first session"}
+                </p>
+              </div>
+              <Link
+                href="/practice/fluency"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-navy-900 text-parchment-50 font-ui text-sm font-medium hover:bg-navy-900/90 transition-colors shrink-0"
+              >
+                Start 5-min session <Icon name="arrowR" size={14} color="#f5f1e7" />
+              </Link>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* ── Coming soon ── */}
       <section className="pt-14 pb-24">

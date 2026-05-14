@@ -53,6 +53,18 @@ export function Icon({ name, size = 16, stroke = 1.6, color = "currentColor", cl
       return (<svg {...props}><path d="M4 7h16M4 12h16M4 17h16"/></svg>);
     case "speaker":
       return (<svg {...props}><path d="M5 9.5h3l4-3.5v12l-4-3.5H5v-5Z"/><path d="M16 9c1 1 1.5 2 1.5 3s-.5 2-1.5 3"/></svg>);
+    case "check":
+      return (<svg {...props}><path d="m5 13 4 4L19 7"/></svg>);
+    case "lock":
+      return (<svg {...props}><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>);
+    case "flame":
+      return (<svg {...props}><path d="M12 2c0 5-4 6-4 10a4 4 0 0 0 8 0c0-4-4-5-4-10Z"/><path d="M12 12c0 2-1 3-1 4a1 1 0 0 0 2 0c0-1-1-2-1-4Z"/></svg>);
+    case "arrowR":
+      return (<svg {...props}><path d="M5 12h14M12 5l7 7-7 7"/></svg>);
+    case "pause":
+      return (<svg {...props}><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>);
+    case "replay":
+      return (<svg {...props}><path d="M2 12a10 10 0 1 0 2-6M2 4v6h6"/></svg>);
     default:
       return null;
   }
