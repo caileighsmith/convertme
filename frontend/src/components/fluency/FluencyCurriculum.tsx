@@ -1,36 +1,46 @@
 "use client";
 
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
-import type { CurriculumItem } from "@/types/fluency";
+import type { AllServicesCurriculum, AllServicesProgress, CurriculumItem, ServiceId } from "@/types/fluency";
 
 interface Props {
-  curriculum: CurriculumItem[];
-  progress: {
-    prayers_complete: number;
-    day_streak: number;
-    avg_accuracy: number;
-    current_prayer_id: string | null;
-    speed_level: number;
-  } | null;
+  curriculum: AllServicesCurriculum;
+  progress: AllServicesProgress | null;
   onStart: (prayerId: string) => void;
 }
 
-export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
-  const currentItem = curriculum.find(
-    (c) => c.status === "current" || c.status === "unlocked"
-  ) ?? curriculum.find((c) => c.id === progress?.current_prayer_id);
+const SERVICES: { id: ServiceId; label: string; he: string; time: string }[] = [
+  { id: "shacharit", label: "Shacharit", he: "שַׁחֲרִית", time: "Morning" },
+  { id: "mincha",    label: "Mincha",    he: "מִנְחָה",   time: "Afternoon" },
+  { id: "maariv",    label: "Maariv",    he: "מַעֲרִיב",  time: "Evening" },
+];
 
-  const prayersComplete = progress?.prayers_complete ?? 0;
-  const streak = progress?.day_streak ?? 0;
-  const avgAccuracy = progress?.avg_accuracy ?? 0;
-  const speedLevel = currentItem?.speed_level ?? progress?.speed_level ?? 1;
+function getCurrentService(): ServiceId {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "shacharit";
+  if (h >= 12 && h < 18) return "mincha";
+  return "maariv";
+}
+
+export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
+  const [activeService, setActiveService] = useState<ServiceId>(getCurrentService);
+
+  const svcProgress = progress?.[activeService] ?? null;
+  const svcCurriculum = curriculum[activeService];
+  const currentItem = svcCurriculum.find((c) => c.status === "current" || c.status === "unlocked");
+
+  const prayersComplete = svcProgress?.prayers_complete ?? 0;
+  const streak = progress?.overall_streak ?? 0;
+  const avgAccuracy = svcProgress?.avg_accuracy ?? 0;
+  const speedLevel = currentItem?.speed_level ?? svcProgress?.speed_level ?? 1;
+  const totalPrayers = svcCurriculum.length;
 
   return (
     <div className="bg-parchment-50 min-h-screen">
       {/* Hero */}
       <section className="px-6 sm:px-14 pt-11 pb-9 border-b border-parchment-400">
-        <div className="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-12 items-end">
-          {/* Left */}
+        <div className="max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 items-end">
           <div>
             <p className="font-ui text-[11px] uppercase tracking-[0.14em] text-navy-700 mb-3">
               Hebrew Practice · Fluency Trainer
@@ -40,29 +50,29 @@ export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
               <em className="text-navy-800">until they land on their own.</em>
             </h1>
             <p className="font-ui text-base text-navy-800 max-w-[520px] leading-[1.55]">
-              Five minutes a day on a fixed sequence. Each prayer unlocks the next at 75% accuracy.
+              Five minutes a day on a fixed sequence for each service. Each prayer unlocks the next at 75% accuracy.
             </p>
           </div>
 
-          {/* Right: stats strip */}
+          {/* Stats strip */}
           <div className="grid grid-cols-3 gap-0 border border-parchment-400 rounded-[14px] overflow-hidden bg-parchment-100">
             <div className="p-5 border-r border-parchment-400">
-              <div className="font-heading text-[30px] font-normal text-navy-900 leading-none mb-1">
-                {prayersComplete}/8
+              <div className="font-heading text-[28px] font-normal text-navy-900 leading-none mb-1">
+                {prayersComplete}/{totalPrayers}
               </div>
-              <div className="font-ui text-xs text-navy-700">prayers complete</div>
+              <div className="font-ui text-xs text-navy-700">prayers this service</div>
             </div>
             <div className="p-5 border-r border-parchment-400">
               <div className="flex items-center gap-1.5">
-                <div className="font-heading text-[30px] font-normal text-navy-900 leading-none mb-1">
+                <div className="font-heading text-[28px] font-normal text-navy-900 leading-none mb-1">
                   {streak}
                 </div>
-                {streak > 0 && <Icon name="flame" size={16} color="#a8651f" />}
+                {streak > 0 && <Icon name="flame" size={14} color="#a8651f" />}
               </div>
               <div className="font-ui text-xs text-navy-700">day streak</div>
             </div>
             <div className="p-5">
-              <div className="font-heading text-[30px] font-normal text-navy-900 leading-none mb-1">
+              <div className="font-heading text-[28px] font-normal text-navy-900 leading-none mb-1">
                 {avgAccuracy > 0 ? `${Math.round(avgAccuracy * 100)}%` : "—"}
               </div>
               <div className="font-ui text-xs text-navy-700">avg accuracy</div>
@@ -71,23 +81,50 @@ export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
         </div>
       </section>
 
+      {/* Service tabs */}
+      <section className="px-6 sm:px-14 pt-7 pb-0 border-b border-parchment-400">
+        <div className="max-w-[1100px] mx-auto flex gap-0">
+          {SERVICES.map((svc) => {
+            const isActive = activeService === svc.id;
+            const svcProg = progress?.[svc.id];
+            const done = svcProg?.prayers_complete ?? 0;
+            const total = curriculum[svc.id].length;
+            return (
+              <button
+                key={svc.id}
+                onClick={() => setActiveService(svc.id)}
+                className={`flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2.5 px-4 sm:px-6 py-3 sm:py-4 border-b-2 transition-colors font-ui text-sm focus:outline-none ${
+                  isActive
+                    ? "border-navy-900 text-navy-900 font-semibold"
+                    : "border-transparent text-navy-700 hover:text-navy-900"
+                }`}
+              >
+                <span className="flex items-baseline gap-2">
+                  <span>{svc.label}</span>
+                  <span className="font-hebrew text-base text-navy-700" lang="he" dir="rtl">{svc.he}</span>
+                </span>
+                <span className={`font-ui text-[11px] tabular-nums ${isActive ? "text-navy-700" : "text-navy-700/60"}`}>
+                  {done}/{total}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Today's session CTA */}
       {currentItem && (
-        <section className="px-6 sm:px-14 pt-9">
-          <div className="max-w-[1100px] mx-auto bg-parchment-100 border border-parchment-400 rounded-[14px] p-7 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center">
+        <section className="px-6 sm:px-14 pt-7">
+          <div className="max-w-[1100px] mx-auto bg-parchment-100 border border-parchment-400 rounded-[14px] p-6 sm:p-7 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center">
             <div>
               <p className="font-ui text-[11px] uppercase tracking-[0.14em] text-navy-700 mb-2">
                 Today&apos;s session
               </p>
               <div className="flex items-baseline gap-3 flex-wrap mb-1">
-                <span className="font-heading text-[22px] font-normal text-navy-900">
+                <span className="font-heading text-[20px] sm:text-[22px] font-normal text-navy-900">
                   {currentItem.en}
                 </span>
-                <span
-                  className="font-hebrew text-[20px] text-navy-700"
-                  lang="he"
-                  dir="rtl"
-                >
+                <span className="font-hebrew text-[18px] sm:text-[20px] text-navy-700" lang="he" dir="rtl">
                   {currentItem.he}
                 </span>
               </div>
@@ -106,10 +143,10 @@ export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
       )}
 
       {/* Curriculum list */}
-      <section className="px-6 sm:px-14 py-11">
+      <section className="px-6 sm:px-14 py-9 sm:py-11">
         <div className="max-w-[1100px] mx-auto">
           <div className="flex items-baseline justify-between mb-7">
-            <h2 className="font-heading text-[22px] font-normal tracking-tight text-navy-900">
+            <h2 className="font-heading text-[20px] sm:text-[22px] font-normal tracking-tight text-navy-900">
               The path
             </h2>
             <p className="font-ui text-xs text-navy-700 hidden sm:block">
@@ -117,13 +154,10 @@ export function FluencyCurriculum({ curriculum, progress, onStart }: Props) {
             </p>
           </div>
 
-          {/* Spine + rows */}
           <div className="relative">
-            {/* Connecting spine */}
-            <div className="absolute left-[23px] top-[26px] bottom-[26px] w-px bg-parchment-400" />
-
+            <div className="absolute left-[19px] sm:left-[23px] top-[26px] bottom-[26px] w-px bg-parchment-400" />
             <div className="flex flex-col gap-3">
-              {curriculum.map((item) => (
+              {svcCurriculum.map((item) => (
                 <CurriculumRow key={item.id} item={item} onStart={onStart} />
               ))}
             </div>
@@ -148,23 +182,21 @@ function CurriculumRow({
   return (
     <div
       className={`grid grid-cols-[40px_1fr] sm:grid-cols-[48px_1fr_auto] gap-x-3 sm:gap-x-5 gap-y-3 items-start p-3 sm:p-4 rounded-xl transition-colors ${
-        isCurrent
-          ? "bg-parchment-100 border border-gold-400/30"
-          : "bg-transparent"
+        isCurrent ? "bg-parchment-100 border border-gold-400/30" : "bg-transparent"
       }`}
     >
       {/* Stage marker */}
       <div className="flex justify-center pt-0.5">
         {isComplete ? (
-          <div className="w-9 h-9 rounded-full bg-gold-400 text-white grid place-items-center shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gold-400 grid place-items-center shrink-0">
             <Icon name="check" size={14} color="#fff" />
           </div>
         ) : isCurrent ? (
-          <div className="w-9 h-9 rounded-full bg-navy-900 text-parchment-50 grid place-items-center shrink-0 font-ui text-sm font-semibold">
+          <div className="w-9 h-9 rounded-full bg-navy-900 grid place-items-center shrink-0 font-ui text-sm font-semibold text-parchment-50">
             {item.stage}
           </div>
         ) : (
-          <div className="w-9 h-9 rounded-full border border-parchment-400 text-navy-700 grid place-items-center shrink-0">
+          <div className="w-9 h-9 rounded-full border border-parchment-400 grid place-items-center shrink-0 text-navy-700">
             <Icon name="lock" size={14} />
           </div>
         )}
@@ -176,11 +208,7 @@ function CurriculumRow({
           <span className="font-ui text-[15px] font-semibold tracking-tight text-navy-900">
             {item.en}
           </span>
-          <span
-            className="font-hebrew text-lg text-navy-700"
-            lang="he"
-            dir="rtl"
-          >
+          <span className="font-hebrew text-lg text-navy-700" lang="he" dir="rtl">
             {item.he}
           </span>
           {isCurrent && (
@@ -191,17 +219,12 @@ function CurriculumRow({
         </div>
         <p className="font-ui text-sm text-navy-700 mb-2">{item.note}</p>
 
-        {/* Progress bar */}
         {(isComplete || isCurrent) && (
           <div className="flex items-center gap-3 mt-2">
-            <div className="w-36 h-1 bg-parchment-400 rounded-full overflow-hidden">
+            <div className="w-28 sm:w-36 h-1 bg-parchment-400 rounded-full overflow-hidden">
               <div
                 className="h-full bg-navy-900 rounded-full"
-                style={{
-                  width: `${
-                    item.accuracy != null ? Math.round(item.accuracy * 100) : 0
-                  }%`,
-                }}
+                style={{ width: `${item.accuracy != null ? Math.round(item.accuracy * 100) : 0}%` }}
               />
             </div>
             {item.accuracy != null && (
@@ -216,9 +239,30 @@ function CurriculumRow({
             )}
           </div>
         )}
+
+        {/* Mobile action */}
+        {!isLocked && (
+          <div className="sm:hidden mt-3">
+            {isCurrent ? (
+              <button
+                onClick={() => onStart(item.id)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-navy-900 text-parchment-50 font-ui text-sm font-medium hover:bg-navy-900/90 transition-colors"
+              >
+                Continue <Icon name="arrowR" size={13} color="#f5f1e7" />
+              </button>
+            ) : isComplete ? (
+              <button
+                onClick={() => onStart(item.id)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-parchment-500 font-ui text-sm text-navy-900 hover:bg-parchment-100 transition-colors"
+              >
+                Practise again
+              </button>
+            ) : null}
+          </div>
+        )}
       </div>
 
-      {/* Action — hidden on mobile (button lives inline in body area via col-span) */}
+      {/* Desktop action */}
       <div className="hidden sm:flex flex-col items-end gap-2 shrink-0 pt-0.5">
         <span className="font-ui text-xs text-navy-700">{item.mins}</span>
         {isCurrent ? (
@@ -242,27 +286,6 @@ function CurriculumRow({
           </div>
         )}
       </div>
-
-      {/* Mobile action — sits below body in the second column */}
-      {!isLocked && (
-        <div className="sm:hidden col-start-2">
-          {isCurrent ? (
-            <button
-              onClick={() => onStart(item.id)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-navy-900 text-parchment-50 font-ui text-sm font-medium hover:bg-navy-900/90 transition-colors"
-            >
-              Continue <Icon name="arrowR" size={13} color="#f5f1e7" />
-            </button>
-          ) : isComplete ? (
-            <button
-              onClick={() => onStart(item.id)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-parchment-500 font-ui text-sm text-navy-900 hover:bg-parchment-100 transition-colors"
-            >
-              Practise again
-            </button>
-          ) : null}
-        </div>
-      )}
     </div>
   );
 }

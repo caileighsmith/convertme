@@ -2,19 +2,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getFluencyCurriculum, getFluencyProgress } from "@/lib/api";
-import type { CurriculumItem, SessionResult, ProgressSummary } from "@/types/fluency";
+import type { AllServicesCurriculum, AllServicesProgress, CurriculumItem, SessionResult } from "@/types/fluency";
 import { FluencyCurriculum } from "@/components/fluency/FluencyCurriculum";
 import { FluencySession } from "@/components/fluency/FluencySession";
 import { SessionSummary } from "@/components/fluency/SessionSummary";
 
 type View = "curriculum" | "session" | "summary";
 
+const EMPTY_CURRICULUM: AllServicesCurriculum = { shacharit: [], mincha: [], maariv: [] };
+
+function flatCurriculum(c: AllServicesCurriculum): CurriculumItem[] {
+  return [...c.shacharit, ...c.mincha, ...c.maariv];
+}
+
 export default function FluencyPage() {
   const [view, setView] = useState<View>("curriculum");
   const [activePrayerId, setActivePrayerId] = useState<string | null>(null);
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
-  const [curriculum, setCurriculum] = useState<CurriculumItem[]>([]);
-  const [progress, setProgress] = useState<ProgressSummary | null>(null);
+  const [curriculum, setCurriculum] = useState<AllServicesCurriculum>(EMPTY_CURRICULUM);
+  const [progress, setProgress] = useState<AllServicesProgress | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
@@ -44,7 +50,6 @@ export default function FluencyPage() {
   function handleSessionComplete(result: SessionResult) {
     setSessionResult(result);
     setView("summary");
-    // Refresh data in background
     loadData();
   }
 
@@ -70,7 +75,8 @@ export default function FluencyPage() {
     setActivePrayerId(null);
   }
 
-  const activePrayer = curriculum.find((c) => c.id === activePrayerId);
+  const flat = flatCurriculum(curriculum);
+  const activePrayer = flat.find((c) => c.id === activePrayerId);
 
   if (loading) {
     return (
@@ -85,7 +91,7 @@ export default function FluencyPage() {
       <FluencySession
         prayerId={activePrayerId}
         prayerName={activePrayer?.en ?? activePrayerId}
-        streak={progress?.day_streak ?? 0}
+        streak={progress?.overall_streak ?? 0}
         onComplete={handleSessionComplete}
         onExit={handleBack}
       />
@@ -96,8 +102,8 @@ export default function FluencyPage() {
     return (
       <SessionSummary
         result={sessionResult}
-        curriculum={curriculum}
-        streak={progress?.day_streak ?? 0}
+        curriculum={flat}
+        streak={progress?.overall_streak ?? 0}
         onContinue={handleContinue}
         onPracticeAgain={handlePracticeAgain}
         onBack={handleBack}

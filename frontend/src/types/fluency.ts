@@ -1,4 +1,5 @@
 export type PrayerStatus = 'locked' | 'unlocked' | 'current' | 'complete';
+export type ServiceId = 'shacharit' | 'mincha' | 'maariv';
 
 export interface CurriculumItem {
   id: string;
@@ -11,6 +12,12 @@ export interface CurriculumItem {
   accuracy?: number;
   sessions?: number;
   speed_level?: number;
+}
+
+export interface AllServicesCurriculum {
+  shacharit: CurriculumItem[];
+  mincha: CurriculumItem[];
+  maariv: CurriculumItem[];
 }
 
 export type ExerciseType = 'word_tap' | 'chunk_read_along' | 'word_order' | 'speed_read';
@@ -36,4 +43,11 @@ export interface ProgressSummary {
   avg_accuracy: number;
   current_prayer_id: string | null;
   speed_level: number;
+}
+
+export interface AllServicesProgress {
+  shacharit: ProgressSummary;
+  mincha: ProgressSummary;
+  maariv: ProgressSummary;
+  overall_streak: number;
 }

@@ -1,4 +1,4 @@
-import type { CurriculumItem, ExerciseObject, SessionResult, ProgressSummary } from "@/types/fluency";
+import type { AllServicesCurriculum, AllServicesProgress, ExerciseObject, SessionResult } from "@/types/fluency";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "cm_token";
@@ -58,8 +58,8 @@ export async function getWordDefinition(word: string, ref: string) {
 
 // ── Fluency ──────────────────────────────────────────────────────────────────
 
-export async function getFluencyCurriculum(): Promise<CurriculumItem[]> {
-  return apiFetch<CurriculumItem[]>("/api/fluency/curriculum");
+export async function getFluencyCurriculum(): Promise<AllServicesCurriculum> {
+  return apiFetch<AllServicesCurriculum>("/api/fluency/curriculum");
 }
 
 export async function getFluencySession(
@@ -79,6 +79,6 @@ export async function submitFluencySession(
   });
 }
 
-export async function getFluencyProgress(): Promise<ProgressSummary> {
-  return apiFetch<ProgressSummary>("/api/fluency/progress");
+export async function getFluencyProgress(): Promise<AllServicesProgress> {
+  return apiFetch<AllServicesProgress>("/api/fluency/progress");
 }

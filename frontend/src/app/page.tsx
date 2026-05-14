@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { useLocation } from "@/context/LocationContext";
 import { getFluencyProgress } from "@/lib/api";
-import type { ProgressSummary } from "@/types/fluency";
+import type { AllServicesProgress } from "@/types/fluency";
 
 type IconName = "sun" | "horizon" | "moon";
 
@@ -40,22 +40,33 @@ const FEATURES: Feature[] = [
   { title: "Community",          desc: "Questions, stories, and support from others on the same path.",         icon: "compass",    soon: true },
 ];
 
-// Curriculum metadata for display on home page
-const CURRICULUM_META: { id: string; en: string; he: string }[] = [
-  { id: "modeh_ani",  en: "Modeh Ani",          he: "מוֹדֶה אֲנִי" },
-  { id: "barchu",     en: "Barchu",             he: "בָּרְכוּ" },
-  { id: "shema_v1",   en: "Shema · first line", he: "שְׁמַע יִשְׂרָאֵל" },
-  { id: "veahavta",   en: "Shema · Ve'ahavta",  he: "וְאָהַבְתָּ" },
-  { id: "baruch",     en: "Baruch She'amar",    he: "בָּרוּךְ שֶׁאָמַר" },
-  { id: "ashrei",     en: "Ashrei",             he: "אַשְׁרֵי" },
-  { id: "avot",       en: "Amidah · Avot",      he: "אָבוֹת" },
-  { id: "amidah",     en: "Amidah · weekday",   he: "תְּפִלָּה" },
-];
+// Display names for prayer IDs used in the fluency dashboard card
+const PRAYER_DISPLAY: Record<string, { en: string; he: string }> = {
+  "shacharit__modeh_ani":  { en: "Modeh Ani",          he: "מוֹדֶה אֲנִי" },
+  "shacharit__barchu":     { en: "Barchu",             he: "בָּרְכוּ" },
+  "shacharit__shema_v1":   { en: "Shema · first line", he: "שְׁמַע יִשְׂרָאֵל" },
+  "shacharit__veahavta":   { en: "Shema · Ve'ahavta",  he: "וְאָהַבְתָּ" },
+  "shacharit__baruch":     { en: "Baruch She'amar",    he: "בָּרוּךְ שֶׁאָמַר" },
+  "shacharit__ashrei":     { en: "Ashrei",             he: "אַשְׁרֵי" },
+  "shacharit__avot":       { en: "Amidah · Avot",      he: "אָבוֹת" },
+  "shacharit__amidah":     { en: "Amidah · weekday",   he: "תְּפִלָּה" },
+  "mincha__ashrei":        { en: "Ashrei",             he: "אַשְׁרֵי" },
+  "mincha__kaddish":       { en: "Half-Kaddish",       he: "קַדִּישׁ" },
+  "mincha__avot":          { en: "Amidah · Avot",      he: "אָבוֹת" },
+  "mincha__amidah":        { en: "Amidah · weekday",   he: "תְּפִלָּה" },
+  "mincha__aleinu":        { en: "Aleinu",             he: "עָלֵינוּ" },
+  "maariv__barchu":        { en: "Barchu",             he: "בָּרְכוּ" },
+  "maariv__ahavat_olam":   { en: "Ahavat Olam",        he: "אַהֲבַת עוֹלָם" },
+  "maariv__shema_v1":      { en: "Shema · first line", he: "שְׁמַע יִשְׂרָאֵל" },
+  "maariv__hashkiveinu":   { en: "Hashkiveinu",        he: "הַשְׁכִּיבֵנוּ" },
+  "maariv__avot":          { en: "Amidah · Avot",      he: "אָבוֹת" },
+  "maariv__aleinu":        { en: "Aleinu",             he: "עָלֵינוּ" },
+};
 
 export default function HomePage() {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const { info: locationInfo } = useLocation();
-  const [fluencyProgress, setFluencyProgress] = useState<ProgressSummary | null>(null);
+  const [fluencyProgress, setFluencyProgress] = useState<AllServicesProgress | null>(null);
 
   useEffect(() => { setCurrentId(getCurrentServiceId()); }, []);
 
@@ -200,10 +211,14 @@ export default function HomePage() {
 
       {/* ── Daily Fluency Practice card ── */}
       {fluencyProgress && (() => {
-        const currentPrayerMeta = fluencyProgress.current_prayer_id
-          ? CURRICULUM_META.find((m) => m.id === fluencyProgress.current_prayer_id)
-          : CURRICULUM_META[0];
-        if (!currentPrayerMeta) return null;
+        // Show the current service's current prayer
+        const serviceKey = (currentId ?? "shacharit") as "shacharit" | "mincha" | "maariv";
+        const svcProgress = fluencyProgress[serviceKey];
+        const prayerId = svcProgress?.current_prayer_id;
+        const prayerMeta = prayerId ? PRAYER_DISPLAY[prayerId] : null;
+        if (!prayerMeta) return null;
+        const streak = fluencyProgress.overall_streak;
+        const acc = svcProgress?.avg_accuracy ?? 0;
         return (
           <section className="pt-6 pb-6">
             <div className="bg-parchment-100 border border-parchment-400 rounded-2xl p-7 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center">
@@ -213,23 +228,15 @@ export default function HomePage() {
                 </p>
                 <div className="flex items-baseline gap-3 flex-wrap mb-1">
                   <span className="font-heading text-[22px] font-normal text-navy-900">
-                    {currentPrayerMeta.en}
+                    {prayerMeta.en}
                   </span>
-                  <span
-                    className="font-hebrew text-[20px] text-navy-700"
-                    lang="he"
-                    dir="rtl"
-                  >
-                    {currentPrayerMeta.he}
+                  <span className="font-hebrew text-[20px] text-navy-700" lang="he" dir="rtl">
+                    {prayerMeta.he}
                   </span>
                 </div>
                 <p className="font-ui text-sm text-navy-700">
-                  {fluencyProgress.day_streak > 0
-                    ? `${fluencyProgress.day_streak} day streak · `
-                    : ""}
-                  {fluencyProgress.avg_accuracy > 0
-                    ? `avg accuracy ${Math.round(fluencyProgress.avg_accuracy * 100)}%`
-                    : "Start your first session"}
+                  {streak > 0 ? `${streak} day streak · ` : ""}
+                  {acc > 0 ? `avg accuracy ${Math.round(acc * 100)}%` : "Start your first session"}
                 </p>
               </div>
               <Link

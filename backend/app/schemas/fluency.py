@@ -19,6 +19,12 @@ class CurriculumItem(BaseModel):
     speed_level: int | None = None
 
 
+class AllServicesCurriculum(BaseModel):
+    shacharit: list[CurriculumItem]
+    mincha: list[CurriculumItem]
+    maariv: list[CurriculumItem]
+
+
 class ExerciseObject(BaseModel):
     id: str
     type: ExerciseType
@@ -54,3 +60,10 @@ class ProgressSummary(BaseModel):
     avg_accuracy: float
     current_prayer_id: str | None
     speed_level: int
+
+
+class AllServicesProgress(BaseModel):
+    shacharit: ProgressSummary
+    mincha: ProgressSummary
+    maariv: ProgressSummary
+    overall_streak: int

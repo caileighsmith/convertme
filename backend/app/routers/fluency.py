@@ -16,23 +16,78 @@ from app.schemas.fluency import (
     SessionSubmit,
     SessionResult,
     ProgressSummary,
+    AllServicesCurriculum,
+    AllServicesProgress,
 )
 from app.services.auth import get_current_user
 
 router = APIRouter()
 
-CURRICULUM = [
-    {"id": "modeh_ani",  "stage": 1, "en": "Modeh Ani",          "he": "מוֹדֶה אֲנִי",        "note": "Said every morning · 12 words",      "mins": "~4 min"},
-    {"id": "barchu",     "stage": 2, "en": "Barchu",             "he": "בָּרְכוּ",              "note": "The call to prayer",                  "mins": "~5 min"},
-    {"id": "shema_v1",   "stage": 3, "en": "Shema · first line", "he": "שְׁמַע יִשְׂרָאֵל",    "note": "The central declaration",             "mins": "~6 min"},
-    {"id": "veahavta",   "stage": 4, "en": "Shema · Ve'ahavta",  "he": "וְאָהַבְתָּ",           "note": "First full paragraph",                "mins": "~9 min"},
-    {"id": "baruch",     "stage": 5, "en": "Baruch She'amar",    "he": "בָּרוּךְ שֶׁאָמַר",    "note": "Opens Pesukei Dezimra",               "mins": "~8 min"},
-    {"id": "ashrei",     "stage": 6, "en": "Ashrei",             "he": "אַשְׁרֵי",              "note": "Psalm 145 · said three times a day",  "mins": "~10 min"},
-    {"id": "avot",       "stage": 7, "en": "Amidah · Avot",      "he": "אָבוֹת",               "note": "First blessing of the silent prayer", "mins": "~7 min"},
-    {"id": "amidah",     "stage": 8, "en": "Amidah · weekday",   "he": "תְּפִלָּה",             "note": "The full Amidah — the goal",          "mins": "~14 min"},
+# ── Service curricula ──────────────────────────────────────────────────────────
+
+SHACHARIT_CURRICULUM = [
+    {"id": "shacharit__modeh_ani",  "stage": 1, "en": "Modeh Ani",          "he": "מוֹדֶה אֲנִי",        "note": "Said every morning · 12 words",            "mins": "~4 min"},
+    {"id": "shacharit__barchu",     "stage": 2, "en": "Barchu",             "he": "בָּרְכוּ",              "note": "The call to prayer",                        "mins": "~5 min"},
+    {"id": "shacharit__shema_v1",   "stage": 3, "en": "Shema · first line", "he": "שְׁמַע יִשְׂרָאֵל",    "note": "The central declaration",                   "mins": "~6 min"},
+    {"id": "shacharit__veahavta",   "stage": 4, "en": "Shema · Ve'ahavta",  "he": "וְאָהַבְתָּ",           "note": "First full paragraph",                      "mins": "~9 min"},
+    {"id": "shacharit__baruch",     "stage": 5, "en": "Baruch She'amar",    "he": "בָּרוּךְ שֶׁאָמַר",    "note": "Opens Pesukei DeZimra",                      "mins": "~8 min"},
+    {"id": "shacharit__ashrei",     "stage": 6, "en": "Ashrei",             "he": "אַשְׁרֵי",              "note": "Psalm 145 · said three times a day",         "mins": "~10 min"},
+    {"id": "shacharit__avot",       "stage": 7, "en": "Amidah · Avot",      "he": "אָבוֹת",               "note": "First blessing of the silent prayer",        "mins": "~7 min"},
+    {"id": "shacharit__amidah",     "stage": 8, "en": "Amidah · weekday",   "he": "תְּפִלָּה",             "note": "The full Amidah — the goal",                 "mins": "~14 min"},
 ]
 
-CURRICULUM_IDS = [c["id"] for c in CURRICULUM]
+MINCHA_CURRICULUM = [
+    {"id": "mincha__ashrei",   "stage": 1, "en": "Ashrei",           "he": "אַשְׁרֵי",    "note": "Psalm 145 · opens Mincha",                     "mins": "~6 min"},
+    {"id": "mincha__kaddish",  "stage": 2, "en": "Half-Kaddish",     "he": "קַדִּישׁ",     "note": "Transition prayer before the Amidah",           "mins": "~4 min"},
+    {"id": "mincha__avot",     "stage": 3, "en": "Amidah · Avot",    "he": "אָבוֹת",       "note": "First blessing of the silent prayer",           "mins": "~7 min"},
+    {"id": "mincha__amidah",   "stage": 4, "en": "Amidah · weekday", "he": "תְּפִלָּה",    "note": "The full weekday Amidah",                       "mins": "~12 min"},
+    {"id": "mincha__aleinu",   "stage": 5, "en": "Aleinu",           "he": "עָלֵינוּ",     "note": "Closing prayer of every service",               "mins": "~4 min"},
+]
+
+MAARIV_CURRICULUM = [
+    {"id": "maariv__barchu",       "stage": 1, "en": "Barchu",             "he": "בָּרְכוּ",           "note": "The evening call to prayer",              "mins": "~3 min"},
+    {"id": "maariv__ahavat_olam",  "stage": 2, "en": "Ahavat Olam",       "he": "אַהֲבַת עוֹלָם",     "note": "Evening blessing before Shema",           "mins": "~5 min"},
+    {"id": "maariv__shema_v1",     "stage": 3, "en": "Shema · first line", "he": "שְׁמַע יִשְׂרָאֵל",  "note": "The central declaration",                 "mins": "~4 min"},
+    {"id": "maariv__hashkiveinu",  "stage": 4, "en": "Hashkiveinu",       "he": "הַשְׁכִּיבֵנוּ",      "note": "Evening prayer for peace and protection", "mins": "~5 min"},
+    {"id": "maariv__avot",         "stage": 5, "en": "Amidah · Avot",     "he": "אָבוֹת",             "note": "First blessing of the silent prayer",     "mins": "~7 min"},
+    {"id": "maariv__aleinu",       "stage": 6, "en": "Aleinu",            "he": "עָלֵינוּ",            "note": "Closing prayer of every service",         "mins": "~4 min"},
+]
+
+SERVICE_CURRICULA: dict[str, list[dict]] = {
+    "shacharit": SHACHARIT_CURRICULUM,
+    "mincha":    MINCHA_CURRICULUM,
+    "maariv":    MAARIV_CURRICULUM,
+}
+
+SERVICE_FIRST: dict[str, str] = {
+    "shacharit": "shacharit__modeh_ani",
+    "mincha":    "mincha__ashrei",
+    "maariv":    "maariv__barchu",
+}
+
+PHRASES_KEY_MAP: dict[str, str] = {
+    "shacharit__modeh_ani":  "modeh_ani",
+    "shacharit__barchu":     "barchu",
+    "shacharit__shema_v1":   "shema_v1",
+    "shacharit__veahavta":   "veahavta",
+    "shacharit__baruch":     "baruch",
+    "shacharit__ashrei":     "ashrei",
+    "shacharit__avot":       "avot",
+    "shacharit__amidah":     "amidah",
+    "mincha__ashrei":        "ashrei",
+    "mincha__kaddish":       "kaddish",
+    "mincha__avot":          "avot",
+    "mincha__amidah":        "amidah",
+    "mincha__aleinu":        "aleinu",
+    "maariv__barchu":        "barchu",
+    "maariv__ahavat_olam":   "ahavat_olam",
+    "maariv__shema_v1":      "shema_v1",
+    "maariv__hashkiveinu":   "hashkiveinu",
+    "maariv__avot":          "avot",
+    "maariv__aleinu":        "aleinu",
+}
+
+# ── Phrase corpus ──────────────────────────────────────────────────────────────
 
 PRAYER_PHRASES: dict[str, list[dict]] = {
     "modeh_ani": [
@@ -76,39 +131,71 @@ PRAYER_PHRASES: dict[str, list[dict]] = {
         {"he": "וּפִי יַגִּיד תְּהִלָּתֶךָ", "tr": "u·FI ya·GID te·hi·la·TE·kha", "en": "and my mouth shall declare Your praise"},
         {"he": "הָאֵל הַגָּדוֹל הַגִּבּוֹר וְהַנּוֹרָא", "tr": "ha·EL ha·ga·DOL ha·gi·BOR ve·ha·no·RA", "en": "the great, mighty and awesome God"},
     ],
+    "kaddish": [
+        {"he": "יִתְגַּדַּל וְיִתְקַדַּשׁ שְׁמֵהּ רַבָּא", "tr": "yit·ga·DAL ve·yit·ka·DASH she·MEH ra·BA", "en": "Magnified and sanctified is His great name"},
+        {"he": "בְּעָלְמָא דִּי בְרָא כִרְעוּתֵהּ", "tr": "be·al·MA di ve·RA khir·u·TEH", "en": "in the world He created according to His will"},
+        {"he": "יְהֵא שְׁמֵהּ רַבָּא מְבָרַךְ", "tr": "ye·HE she·MEH ra·BA me·va·RAKH", "en": "May His great name be blessed"},
+        {"he": "לְעָלַם וּלְעָלְמֵי עָלְמַיָּא", "tr": "le·a·LAM ul·al·MEI al·ma·YA", "en": "forever and ever"},
+    ],
+    "aleinu": [
+        {"he": "עָלֵינוּ לְשַׁבֵּחַ לַאֲדוֹן הַכֹּל", "tr": "a·LEI·nu le·sha·BEI·akh la·a·DON ha·KOL", "en": "It is our duty to praise the Master of all"},
+        {"he": "לָתֵת גְּדֻלָּה לְיוֹצֵר בְּרֵאשִׁית", "tr": "la·TET ge·du·LA le·yo·TZER be·re·SHEET", "en": "to ascribe greatness to the Creator of the world"},
+        {"he": "וַאֲנַחְנוּ כּוֹרְעִים וּמִשְׁתַּחֲוִים", "tr": "va·a·NAKH·nu ko·re·IM u·mish·ta·kha·VIM", "en": "and we bow down and prostrate ourselves"},
+        {"he": "לִפְנֵי מֶלֶךְ מַלְכֵי הַמְּלָכִים", "tr": "lif·NEI ME·lekh mal·KEI ha·me·la·KHIM", "en": "before the King of kings of kings"},
+    ],
+    "ahavat_olam": [
+        {"he": "אַהֲבַת עוֹלָם בֵּית יִשְׂרָאֵל עַמְּךָ אָהָבְתָּ", "tr": "a·ha·VAT o·LAM beit yis·ra·EL a·me·KHA a·HAV·ta", "en": "With everlasting love You have loved Your people Israel"},
+        {"he": "תּוֹרָה וּמִצְוֹת חֻקִּים וּמִשְׁפָּטִים", "tr": "to·RA u·mitz·VOT khu·KIM u·mish·pa·TIM", "en": "Torah and commandments, statutes and judgments"},
+        {"he": "כִּי הֵם חַיֵּינוּ וְאֹרֶךְ יָמֵינוּ", "tr": "ki HEM kha·YEI·nu ve·O·rekh ya·MEI·nu", "en": "for they are our life and the length of our days"},
+    ],
+    "hashkiveinu": [
+        {"he": "הַשְׁכִּיבֵנוּ יְיָ אֱלֹהֵינוּ לְשָׁלוֹם", "tr": "hash·ki·VEI·nu a·do·NAI e·lo·HEI·nu le·sha·LOM", "en": "Cause us to lie down, O Lord our God, in peace"},
+        {"he": "וְהַעֲמִידֵנוּ מַלְכֵּנוּ לְחַיִּים", "tr": "ve·ha·a·mi·DEI·nu mal·KEI·nu le·kha·YIM", "en": "and raise us up again, our King, to life"},
+        {"he": "וּפְרוֹשׂ עָלֵינוּ סֻכַּת שְׁלוֹמֶךָ", "tr": "u·fe·ROS a·LEI·nu su·KAT she·lo·ME·kha", "en": "and spread over us the shelter of Your peace"},
+        {"he": "בָּרוּךְ אַתָּה יְיָ שׁוֹמֵר עַמּוֹ יִשְׂרָאֵל לָעַד", "tr": "ba·RUKH a·TA a·do·NAI sho·MER a·MO yis·ra·EL la·AD", "en": "Blessed are You, Lord, who guards His people Israel forever"},
+    ],
 }
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# ── helpers ────────────────────────────────────────────────────────────────────
 
-def _all_transliterations(exclude_prayer: str | None = None) -> list[dict]:
-    """Return all phrases that can be used as distractors."""
+def _next_prayer_id(prayer_id: str) -> str | None:
+    if "__" not in prayer_id:
+        return None
+    service = prayer_id.split("__")[0]
+    curriculum = SERVICE_CURRICULA.get(service, [])
+    ids = [c["id"] for c in curriculum]
+    if prayer_id not in ids:
+        return None
+    idx = ids.index(prayer_id)
+    return ids[idx + 1] if idx + 1 < len(ids) else None
+
+
+def _all_transliterations(exclude_key: str | None = None) -> list[dict]:
     result = []
-    for pid, phrases in PRAYER_PHRASES.items():
-        if pid != exclude_prayer:
+    for key, phrases in PRAYER_PHRASES.items():
+        if key != exclude_key:
             result.extend(phrases)
     return result
 
 
 def _generate_exercises(prayer_id: str) -> list[ExerciseObject]:
-    phrases = PRAYER_PHRASES.get(prayer_id, [])
+    phrases_key = PHRASES_KEY_MAP.get(prayer_id, prayer_id)
+    phrases = PRAYER_PHRASES.get(phrases_key, [])
     if not phrases:
         return []
 
     rng = random.Random()
     exercises: list[ExerciseObject] = []
+    all_distractors = _all_transliterations(phrases_key)
+    if len(all_distractors) < 3:
+        all_distractors = list(phrases)
 
     # Word-tap × 3
     pool = phrases[:]
     if len(pool) < 3:
         pool = (pool * 4)[:3]
     chosen_wt = rng.sample(pool, min(3, len(pool)))
-    all_distractors = _all_transliterations(prayer_id)
-    # Fall back to same-prayer phrases if needed
-    if len(all_distractors) < 3:
-        all_distractors = [p for p in phrases if p not in chosen_wt]
-
     for phrase in chosen_wt:
-        # 3 distractor transliterations + correct = 4 options
         available = [p for p in (all_distractors + phrases) if p["tr"] != phrase["tr"]]
         distractors = rng.sample(available, min(3, len(available)))
         options = [{"tr": d["tr"], "en": d["en"], "correct": False} for d in distractors]
@@ -126,19 +213,17 @@ def _generate_exercises(prayer_id: str) -> list[ExerciseObject]:
     # Chunk-read-along × 3
     chosen_cra = rng.sample(phrases, min(3, len(phrases)))
     for phrase in chosen_cra:
-        # Build 3 options (1 correct + 2 distractors)
         distractor_pool = [p for p in (phrases + all_distractors) if p["he"] != phrase["he"]]
         distractors = rng.sample(distractor_pool, min(2, len(distractor_pool)))
-        options = [phrase["he"]] + [d["he"] for d in distractors]
-        rng.shuffle(options)
-        correct_index = options.index(phrase["he"])
+        options_he = [phrase["he"]] + [d["he"] for d in distractors]
+        rng.shuffle(options_he)
         exercises.append(ExerciseObject(
             id=str(uuid.uuid4()),
             type="chunk_read_along",
             payload={
                 "phrase": {"he": phrase["he"], "words": phrase["he"].split()},
-                "options": options,
-                "correct_index": correct_index,
+                "options": options_he,
+                "correct_index": options_he.index(phrase["he"]),
             },
         ))
 
@@ -149,11 +234,10 @@ def _generate_exercises(prayer_id: str) -> list[ExerciseObject]:
     chosen_wo = rng.sample(order_candidates, min(2, len(order_candidates)))
     for phrase in chosen_wo:
         words_he = phrase["he"].split()
-        words_tr = phrase["tr"].split("·") if "·" in phrase["tr"] else phrase["tr"].split()
-        # Pair up (pad/truncate tr to match)
-        while len(words_tr) < len(words_he):
-            words_tr.append("")
-        words = [{"he": h, "tr": t} for h, t in zip(words_he, words_tr[:len(words_he)])]
+        tr_parts = phrase["tr"].split("·") if "·" in phrase["tr"] else phrase["tr"].split()
+        while len(tr_parts) < len(words_he):
+            tr_parts.append("")
+        words = [{"he": h, "tr": t} for h, t in zip(words_he, tr_parts[:len(words_he)])]
         shuffled = words[:]
         rng.shuffle(shuffled)
         exercises.append(ExerciseObject(
@@ -167,16 +251,12 @@ def _generate_exercises(prayer_id: str) -> list[ExerciseObject]:
         ))
 
     # Speed-read × 2
-    speed_level = 1  # default; overridden by progress in the router
     all_lines = [p["he"] for p in phrases]
     for _ in range(2):
         exercises.append(ExerciseObject(
             id=str(uuid.uuid4()),
             type="speed_read",
-            payload={
-                "lines": all_lines,
-                "speed_level": speed_level,
-            },
+            payload={"lines": all_lines, "speed_level": 1},
         ))
 
     return exercises
@@ -193,59 +273,40 @@ async def _get_or_create_progress(
     )
     row = result.scalar_one_or_none()
     if row is None:
+        first_ids = set(SERVICE_FIRST.values())
         row = FluencyProgress(
             user_id=user_id,
             prayer_id=prayer_id,
-            unlocked=(prayer_id == "modeh_ani"),
+            unlocked=(prayer_id in first_ids),
         )
         db.add(row)
         await db.flush()
     return row
 
 
-# ── routes ────────────────────────────────────────────────────────────────────
-
-@router.get("/curriculum", response_model=list[CurriculumItem])
-async def get_curriculum(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    # Fetch all existing progress rows for user
-    result = await db.execute(
-        select(FluencyProgress).where(FluencyProgress.user_id == current_user.id)
-    )
-    progress_rows = {row.prayer_id: row for row in result.scalars().all()}
-
+def _build_service_curriculum(
+    service_id: str,
+    progress_rows: dict[str, FluencyProgress],
+) -> list[CurriculumItem]:
+    curriculum = SERVICE_CURRICULA.get(service_id, [])
+    first_id = SERVICE_FIRST.get(service_id)
     items: list[CurriculumItem] = []
-    for meta in CURRICULUM:
+    for meta in curriculum:
         pid = meta["id"]
         row = progress_rows.get(pid)
-
         if row is None:
-            # modeh_ani is always unlocked, rest locked by default
-            if pid == "modeh_ani":
-                status: str = "current"
-            else:
-                status = "locked"
-            accuracy = None
-            sessions = None
-            speed_level = None
+            status: str = "current" if pid == first_id else "locked"
+            accuracy, sessions, speed_level = None, None, None
         elif row.completed:
             status = "complete"
-            accuracy = row.best_accuracy
-            sessions = row.sessions_done
-            speed_level = row.speed_level
+            accuracy, sessions, speed_level = row.best_accuracy, row.sessions_done, row.speed_level
         elif row.unlocked:
             status = "current"
             accuracy = row.best_accuracy if row.sessions_done > 0 else None
-            sessions = row.sessions_done
-            speed_level = row.speed_level
+            sessions, speed_level = row.sessions_done, row.speed_level
         else:
             status = "locked"
-            accuracy = None
-            sessions = None
-            speed_level = None
-
+            accuracy, sessions, speed_level = None, None, None
         items.append(CurriculumItem(
             id=pid,
             stage=meta["stage"],
@@ -258,8 +319,82 @@ async def get_curriculum(
             sessions=sessions,
             speed_level=speed_level,
         ))
-
     return items
+
+
+def _compute_streak(rows: list[FluencyProgress]) -> int:
+    session_dates: set[date] = set()
+    for r in rows:
+        if r.last_session:
+            session_dates.add(r.last_session.astimezone(timezone.utc).date())
+    today = datetime.now(timezone.utc).date()
+    streak = 0
+    check = today
+    while check in session_dates:
+        streak += 1
+        check -= timedelta(days=1)
+    if streak == 0:
+        check = today - timedelta(days=1)
+        while check in session_dates:
+            streak += 1
+            check -= timedelta(days=1)
+    return streak
+
+
+def _build_service_progress(
+    service_id: str,
+    progress_rows: dict[str, FluencyProgress],
+    overall_streak: int,
+) -> ProgressSummary:
+    curriculum = SERVICE_CURRICULA.get(service_id, [])
+    service_prayer_ids = {c["id"] for c in curriculum}
+    rows = [r for r in progress_rows.values() if r.prayer_id in service_prayer_ids]
+
+    prayers_complete = sum(1 for r in rows if r.completed)
+    started = [r for r in rows if r.sessions_done > 0]
+    avg_accuracy = (sum(r.best_accuracy for r in started) / len(started)) if started else 0.0
+
+    first_id = SERVICE_FIRST.get(service_id)
+    current_prayer_id: str | None = None
+    for meta in curriculum:
+        pid = meta["id"]
+        row = progress_rows.get(pid)
+        if pid == first_id and row is None:
+            current_prayer_id = pid
+            break
+        if row and row.unlocked and not row.completed:
+            current_prayer_id = pid
+            break
+
+    speed_level = 1
+    if current_prayer_id and current_prayer_id in progress_rows:
+        speed_level = progress_rows[current_prayer_id].speed_level
+
+    return ProgressSummary(
+        prayers_complete=prayers_complete,
+        day_streak=overall_streak,
+        avg_accuracy=round(avg_accuracy, 4),
+        current_prayer_id=current_prayer_id,
+        speed_level=speed_level,
+    )
+
+
+# ── routes ─────────────────────────────────────────────────────────────────────
+
+@router.get("/curriculum", response_model=AllServicesCurriculum)
+async def get_curriculum(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(FluencyProgress).where(FluencyProgress.user_id == current_user.id)
+    )
+    progress_rows = {row.prayer_id: row for row in result.scalars().all()}
+    return AllServicesCurriculum(
+        shacharit=_build_service_curriculum("shacharit", progress_rows),
+        mincha=_build_service_curriculum("mincha", progress_rows),
+        maariv=_build_service_curriculum("maariv", progress_rows),
+    )
 
 
 @router.get("/session/{prayer_id}", response_model=SessionResponse)
@@ -268,10 +403,10 @@ async def get_session(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if prayer_id not in PRAYER_PHRASES:
+    phrases_key = PHRASES_KEY_MAP.get(prayer_id)
+    if phrases_key is None or phrases_key not in PRAYER_PHRASES:
         raise HTTPException(status_code=404, detail="Prayer not found")
 
-    # Get user's speed level for this prayer
     result = await db.execute(
         select(FluencyProgress).where(
             FluencyProgress.user_id == current_user.id,
@@ -282,8 +417,6 @@ async def get_session(
     speed_level = progress.speed_level if progress else 1
 
     exercises = _generate_exercises(prayer_id)
-
-    # Inject real speed_level into speed_read exercises
     for ex in exercises:
         if ex.type == "speed_read":
             ex.payload["speed_level"] = speed_level
@@ -298,7 +431,7 @@ async def submit_session(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if prayer_id not in PRAYER_PHRASES:
+    if prayer_id not in PHRASES_KEY_MAP:
         raise HTTPException(status_code=404, detail="Prayer not found")
 
     total = len(body.results)
@@ -311,19 +444,14 @@ async def submit_session(
     progress.last_session = datetime.now(timezone.utc)
 
     passed = accuracy >= 0.75
-
     if passed and not progress.completed:
         progress.completed = True
         progress.unlocked = True
-        # Unlock next prayer
-        if prayer_id in CURRICULUM_IDS:
-            idx = CURRICULUM_IDS.index(prayer_id)
-            if idx + 1 < len(CURRICULUM_IDS):
-                next_id = CURRICULUM_IDS[idx + 1]
-                next_progress = await _get_or_create_progress(db, current_user.id, next_id)
-                next_progress.unlocked = True
+        next_id = _next_prayer_id(prayer_id)
+        if next_id:
+            next_progress = await _get_or_create_progress(db, current_user.id, next_id)
+            next_progress.unlocked = True
 
-    # Speed level logic
     if accuracy >= 0.85:
         progress.consecutive_high += 1
         if progress.consecutive_high >= 2:
@@ -335,24 +463,17 @@ async def submit_session(
     await db.commit()
     await db.refresh(progress)
 
-    # Determine next prayer id
-    next_prayer_id: str | None = None
-    if passed and prayer_id in CURRICULUM_IDS:
-        idx = CURRICULUM_IDS.index(prayer_id)
-        if idx + 1 < len(CURRICULUM_IDS):
-            next_prayer_id = CURRICULUM_IDS[idx + 1]
-
     return SessionResult(
         prayer_id=prayer_id,
         accuracy=accuracy,
         passed=passed,
-        next_prayer_id=next_prayer_id,
+        next_prayer_id=_next_prayer_id(prayer_id) if passed else None,
         speed_level=progress.speed_level,
         sessions_done=progress.sessions_done,
     )
 
 
-@router.get("/progress", response_model=ProgressSummary)
+@router.get("/progress", response_model=AllServicesProgress)
 async def get_progress(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -360,54 +481,13 @@ async def get_progress(
     result = await db.execute(
         select(FluencyProgress).where(FluencyProgress.user_id == current_user.id)
     )
-    rows = result.scalars().all()
+    all_rows = list(result.scalars().all())
+    progress_rows = {r.prayer_id: r for r in all_rows}
+    overall_streak = _compute_streak(all_rows)
 
-    prayers_complete = sum(1 for r in rows if r.completed)
-
-    # Day streak: count consecutive calendar days (UTC) with at least one session
-    session_dates: set[date] = set()
-    for r in rows:
-        if r.last_session:
-            session_dates.add(r.last_session.astimezone(timezone.utc).date())
-
-    today = datetime.now(timezone.utc).date()
-    streak = 0
-    check = today
-    while check in session_dates:
-        streak += 1
-        check = check - timedelta(days=1)
-    # If today has no session, check if yesterday starts the streak
-    if streak == 0 and today not in session_dates:
-        check = today - timedelta(days=1)
-        while check in session_dates:
-            streak += 1
-            check = check - timedelta(days=1)
-
-    started_rows = [r for r in rows if r.sessions_done > 0]
-    avg_accuracy = (sum(r.best_accuracy for r in started_rows) / len(started_rows)) if started_rows else 0.0
-
-    # Current prayer: first unlocked but not completed
-    current_prayer_id: str | None = None
-    progress_map = {r.prayer_id: r for r in rows}
-    for meta in CURRICULUM:
-        pid = meta["id"]
-        row = progress_map.get(pid)
-        if pid == "modeh_ani" and row is None:
-            current_prayer_id = pid
-            break
-        if row and row.unlocked and not row.completed:
-            current_prayer_id = pid
-            break
-
-    # Speed level of current prayer
-    speed_level = 1
-    if current_prayer_id and current_prayer_id in progress_map:
-        speed_level = progress_map[current_prayer_id].speed_level
-
-    return ProgressSummary(
-        prayers_complete=prayers_complete,
-        day_streak=streak,
-        avg_accuracy=round(avg_accuracy, 4),
-        current_prayer_id=current_prayer_id,
-        speed_level=speed_level,
+    return AllServicesProgress(
+        shacharit=_build_service_progress("shacharit", progress_rows, overall_streak),
+        mincha=_build_service_progress("mincha", progress_rows, overall_streak),
+        maariv=_build_service_progress("maariv", progress_rows, overall_streak),
+        overall_streak=overall_streak,
     )
