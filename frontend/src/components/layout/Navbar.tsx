@@ -67,6 +67,14 @@ export function Navbar() {
           {/* Auth — desktop */}
           {user ? (
             <div className="hidden md:flex items-center gap-2">
+              {user.is_admin && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1.5 rounded-lg font-ui text-xs text-navy-600 hover:text-navy-900 transition-colors"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/profile"
                 className="w-8 h-8 rounded-full bg-navy-900 text-parchment-50 grid place-items-center font-ui text-xs font-semibold hover:bg-navy-900/80 transition-colors"
@@ -116,6 +124,15 @@ export function Navbar() {
             {user ? (
               <>
                 <p className="px-3 py-1 font-ui text-xs text-navy-700">{user.email}</p>
+                {user.is_admin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className="block px-3 py-2.5 rounded-lg font-ui text-sm text-navy-800 hover:bg-parchment-200 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   onClick={() => setOpen(false)}

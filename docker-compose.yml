@@ -28,6 +28,7 @@ services:
       - DATABASE_URL=postgresql+asyncpg://convertme:convertme@db:5432/convertme
       - JWT_SECRET_KEY=change-me-in-production
       - JWT_EXPIRE_MINUTES=10080
+      - ADMIN_EMAIL=caillouleighsmith@gmail.com
     volumes:
       - ./backend:/app
     depends_on:

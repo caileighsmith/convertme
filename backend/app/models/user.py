@@ -14,6 +14,8 @@ class User(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
+    is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     # Onboarding preferences — null until the user completes onboarding
     journey_stage: Mapped[str | None] = mapped_column(String(100), nullable=True, default=None)
     tradition: Mapped[str | None] = mapped_column(String(100), nullable=True, default=None)

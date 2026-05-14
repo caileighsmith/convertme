@@ -25,6 +25,7 @@ class OnboardingRequest(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
+    is_admin: bool = False
     journey_stage: str | None = None
     tradition: str | None = None
     hebrew_level: int | None = None

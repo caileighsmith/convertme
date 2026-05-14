@@ -11,6 +11,7 @@ export interface OnboardingData {
 interface User {
   id: number;
   email: string;
+  is_admin: boolean;
 }
 
 interface AuthContextValue {
@@ -33,6 +34,7 @@ const TOKEN_KEY = "cm_token";
 interface MeResponse {
   id: number;
   email: string;
+  is_admin: boolean;
   journey_stage: string | null;
   tradition: string | null;
   hebrew_level: number | null;
@@ -54,7 +56,7 @@ async function fetchMe(token: string): Promise<{ user: User; onboardingData: Onb
   if (!res.ok) throw new Error("invalid token");
   const data: MeResponse = await res.json();
   return {
-    user: { id: data.id, email: data.email },
+    user: { id: data.id, email: data.email, is_admin: data.is_admin },
     onboardingData: parseOnboarding(data),
   };
 }

@@ -8,6 +8,7 @@ from app.schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse,
     UserResponse, OnboardingRequest,
 )
+from app.config import settings
 from app.services.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
@@ -19,7 +20,8 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = User(email=body.email, hashed_password=hash_password(body.password))
+    is_admin = bool(settings.admin_email and body.email.lower() == settings.admin_email.lower())
+    user = User(email=body.email, hashed_password=hash_password(body.password), is_admin=is_admin)
     db.add(user)
     await db.commit()
     await db.refresh(user)

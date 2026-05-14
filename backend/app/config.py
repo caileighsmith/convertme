@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://convertme:convertme@db:5432/convertme"
 
+    admin_email: str = ""
+
     # JWT
     jwt_secret_key: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
